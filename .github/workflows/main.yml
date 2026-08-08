@@ -1,20 +1,29 @@
-name: Sync to Google Drive
+name: Sync Artifacts to Google Drive
 
 on:
   push:
-    branches: [ main ]
+    branches:
+      - main
+      - master
   workflow_dispatch:
 
 jobs:
   upload:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout del código
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Subir archivos a Google Drive
+      - name: Decode Google Drive Credentials
+        run: |
+          echo "${{ secrets.GDRIVE_CREDENTIALS }}" | base64 -d > gdrive_credentials.json
+
+      - name: Upload to Google Drive
         uses: Jumbo810/Upload_Github_Artifacts_TO_GDrive@v2.3.5
         with:
-          target: "./*"
-          credentials: ${{ secrets.GDRIVE_CREDENTIALS }}
-          parent_folder_id: ${{ secrets.GDRIVE_FOLDER_ID }}
+          credentials: ${{ github.workspace }}/gdrive_credentials.json
+          target: '1u_QZzWaJ043p1pp2yUv-ou6Me-8Ffesy'
+
+      - name: Clean up credentials
+        if: always()
+        run: rm -f gdrive_credentials.json
